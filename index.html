@@ -131,7 +131,7 @@ function endPA(m){say(m);if(G.top){if(!/フォア|犠牲/.test(m)){S.ab=(S.ab||0
 function out(m){snd(220,.3,'triangle',.15,110);G.out++;endPA(m)}
 function walk(){const B=G.bases,R=RB,bh=spawn();if(B[0]){if(B[1]){if(B[2]){run(1);mv(R[2],3,4,1)}B[2]=1;RB[2]=R[1];mv(R[1],2,3)}B[1]=1;RB[1]=R[0];mv(R[0],1,2)}B[0]=1;RB[0]=bh;mv(bh,0,1);endPA('フォアボール')}
 function doSteal(){if(!G.steal)return;G.steal=false;if(!G.bases[0]||G.bases[1])return;if(Math.random()<.62){G.bases[0]=0;G.bases[1]=1;RB[1]=RB[0];mv(RB[1],1,2);RB[0]=null;G.sx='盗塁成功！';S.m.st++}else{G.bases[0]=0;if(RB[0]){RB[0].g.visible=false;RB[0].q=[]}RB[0]=null;G.out++;G.sx='盗塁失敗…'}}
-function strike(m){zf(0xff5555);G.s++;if(G.s>=3)out(m==='空振り'?'空振り三振！':'見逃し三振！');else show(m,1)}
+function strike(m){zf(0xff5555);ump.aR.rotation.x=-2.8;clearTimeout(strike.t);strike.t=setTimeout(()=>ump.aR.rotation.x=0,700);G.s++;if(G.s>=3)out(m==='空振り'?'空振り三振！':'見逃し三振！');else show(m,1)}
 function balls(){zf(0x55aaff);G.b++;if(G.b>=4)walk();else show('ボール',.9)}
 function judge(){doSteal();snd(160,.08,'square',.2,60);const dx=Math.max(0,Math.abs(G.aim.x)-ZX),dy=Math.max(0,Y0-G.aim.y,G.aim.y-Y1),d=Math.hypot(dx,dy);(d===0||(d<.08&&Math.random()<.55-d*5))?strike('ストライク'):balls()}
 function checkEnd(){
@@ -153,7 +153,7 @@ function startPitch(err){
  if(G.top){ty=PT[Math.random()*PT.length|0];aim=Math.random()<.5+L*.02?{x:rnd(-.26,.26),y:rnd(.5,1.1)}:{x:(Math.random()<.5?-1:1)*rnd(.34,.55),y:rnd(.2,1.4)}}
  else{ty=PT[G.sel];G.np=(G.np||0)+1;const j=.07-((G.sp||cid(S.sp)).o-50)/50*.035+err*.45+Math.max(0,G.np-25)*.004;aim={x:cx+rnd(-j,j),y:cy+rnd(-j,j)}}
  G.aim=new THREE.Vector3(aim.x,aim.y,0);G.T=ty.T*(G.top?(1-L*.012)*(1.15-S.diff*.15):1+Math.max(0,(G.np||0)-30)*.004);G.br=[ty.b[0]*(G.top&&Math.random()<.5?-1:1),ty.b[1],ty.b[2]];
- batter.g.visible=true;G.bh=null;if(G.top)meetR=mR();if(G.b===0&&G.s===0)intro();G.kmh=Math.round(80+(1.5-G.T)*130);G.pn=ty.n;G.pt=0;G.swung=false;G.sw=-1;G.phase='pitch';G.wind=G.top?.35:0;ball.visible=!G.top;$('msg').textContent='';ui()}
+ batter.g.visible=true;G.bh=null;if(G.top)meetR=mR();if(G.b===0&&G.s===0)intro();G.kmh=Math.round(80+(1.5-G.T)*130);G.pn=ty.n;G.pt=0;G.swung=false;G.sw=-1;G.phase='pitch';G.wind=G.top?.55:0;ball.visible=!G.top;$('msg').textContent='';ui()}
 function startHit(th,ph,v,q){
  const g=ph<8*D2R,vel=g?new THREE.Vector3(Math.sin(th)*24,0,-Math.cos(th)*24):new THREE.Vector3(v*Math.cos(ph)*Math.sin(th),v*Math.sin(ph),-v*Math.cos(ph)*Math.cos(th)),D=18+q*45;
  let land;if(g)land=new THREE.Vector3(Math.sin(th)*D,0,-Math.cos(th)*D);else{const t=(vel.y+Math.sqrt(vel.y*vel.y+17.6))/9.8;land=new THREE.Vector3(vel.x*t,0,vel.z*t)}
@@ -217,7 +217,7 @@ $('menu').onclick=e=>{const a=e.target.closest('[data-a]');if(!a)return;const[k,
  if(k==='start'){$('menu').style.display='none';const o=S.opp;G=newG();S.opp=o;G.phase='ready';setMode()}};
 
 const gain=x=>{S.exp+=x;let up=0;while(S.exp>=100+S.lv*40){S.exp-=100+S.lv*40;S.lv++;S.gems+=200;up++}return up};let ambOn=0;function amb(){if(ambOn)return;ambOn=1;try{const c=ac(),n=c.sampleRate*2|0,b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=Math.random()*2-1;const s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();s.buffer=b;s.loop=true;f.type='lowpass';f.frequency.value=500;g.gain.value=.035;s.connect(f);f.connect(g);g.connect(c.destination);s.start()}catch(e){}}
-let zT=0,cheer=0;const zf=c=>{zone.material.color.set(c);zT=.5};function intro(){const e=$('bn'),c=G.top?curB():null;e.innerHTML=G.top?`${G.ord%9+1}番 ${c.n}${c.k?' ★'+SK[c.k]:''}<br><small>OVR${c.o} ミート${c.m} パワー${c.p} 走${c.s}</small>`:`相手打者 ${OPP()[0]}<br><small>Lv.${lvl()}</small>`;e.style.display='block';e.classList.remove('sl');void e.offsetWidth;e.classList.add('sl');clearTimeout(intro.t);intro.t=setTimeout(()=>e.style.display='none',2200)}
+let zT=0,cheer=0,shk=0;const zf=c=>{zone.material.color.set(c);zT=.5};function intro(){const e=$('bn'),c=G.top?curB():null;e.innerHTML=G.top?`${G.ord%9+1}番 ${c.n}${c.k?' ★'+SK[c.k]:''}<br><small>OVR${c.o} ミート${c.m} パワー${c.p} 走${c.s}</small>`:`相手打者 ${OPP()[0]}<br><small>Lv.${lvl()}</small>`;e.style.display='block';e.classList.remove('sl');void e.offsetWidth;e.classList.add('sl');clearTimeout(intro.t);intro.t=setTimeout(()=>e.style.display='none',2200)}
 const mR=()=>{const c=curB();return .13+c.m/100*.07+(c.k==='M'?.03:0)+(c.k==='C'&&(G.bases[1]||G.bases[2])?.04:0)};const clock=new THREE.Clock(),tmp=new THREE.Vector3(),ease=u=>u*u*(3-2*u);
 function frame(){
  requestAnimationFrame(frame);const dt0=Math.min(.05,clock.getDelta()),dt=dt0*(G.slow>0?.3:1);G.slow-=dt0;
@@ -227,7 +227,7 @@ function frame(){
  if(ph==='ready'){G.timer-=dt;ball.visible=false;if(G.top&&G.timer<=0)startPitch(0)}
  else if(ph==='gauge'){G.gt+=dt;$('gauge').lastElementChild.style.left=(.5+.5*Math.sin(G.gt*5))*98+'%'}
  else if(ph==='pitch'){
-  if(G.wind>0){G.wind-=dt;const u=clamp(1-G.wind/.35,0,1);pitcher.aR.rotation.x=.4+5*ease(u);pitcher.torso.rotation.x=u*.35;pitcher.lL.rotation.x=-Math.sin(u*3)*.8;ball.visible=G.wind<=0;if(G.wind<=0)posAt(0,ball.position)}
+  if(G.wind>0){G.wind-=dt;const u=clamp(1-G.wind/.55,0,1),lift=Math.sin(Math.min(u/.5,1)*Math.PI/2);pitcher.aR.rotation.x=u<.5?.4+lift*1.8:2.2+3.6*ease((u-.5)/.5);pitcher.aL.rotation.x=-1.3*lift*(1-u*.7);pitcher.torso.rotation.x=-.3*Math.sin(Math.min(u/.5,1)*Math.PI)+.5*ease(u);pitcher.torso.rotation.y=-.6*Math.sin(Math.min(u/.7,1)*Math.PI);pitcher.lL.rotation.x=-1.3*Math.sin(Math.min(u/.6,1)*Math.PI);pitcher.g.position.z=-18.4+ease(u)*.9;ball.visible=G.wind<=0;if(G.wind<=0)posAt(0,ball.position)}
   else{G.pt+=dt;posAt(Math.min(G.pt/G.T,1),ball.position);ball.rotation.x+=dt*30*(1-Math.abs(G.br[0]));ball.rotation.z+=dt*40*G.br[0];
    if(G.top&&!G.swung&&G.pt>G.T+.15){G.swung=true;judge()}
    else if(!G.top&&G.pt>=G.T&&!G.swung){G.swung=true;cpuBat()}}}
@@ -236,11 +236,11 @@ function frame(){
   else{f.v.y-=9.8*dt;if(f.p.y<=.1){f.p.y=.1;ball.position.copy(f.p);decide(Math.hypot(f.p.x,f.p.z))}}
   ball.position.copy(f.p)}
  else if(ph==='result'){G.timer-=dt;const TH=G.thr;if(TH){TH.t+=dt/.7;const u=Math.min(TH.t,1);ball.position.lerpVectors(TH.a,TH.b,u);ball.position.y+=Math.sin(u*Math.PI)*2.5;if(u>=1)G.thr=null}if(G.timer<=0&&(!mvg()||G.timer<-8)&&!G.thr){$('msg').textContent='';checkEnd();if(G.phase==='result'){G.phase='ready';G.timer=.7;G.chase=false;fx=null}}}
- if(ph!=='pitch'||G.wind<=0){pitcher.aR.rotation.x*=1-Math.min(1,dt*6);pitcher.torso.rotation.x*=1-Math.min(1,dt*6);pitcher.lL.rotation.x*=1-Math.min(1,dt*6)}
- if(G.sw>=0)G.sw+=dt/.3;if(G.bh&&G.sw>.5)batter.g.visible=false;if(G.sw<0)bat.rotation.z=.3+Math.sin(clock.elapsedTime*5)*.1;const u=clamp(G.sw,0,1);batter.torso.rotation.y=G.sw<0?(G.hold?1.35:.9):.9-2.3*ease(u);bat.rotation.x=G.sw<0?0:Math.min(u*4,1)*1.5;
+ if(ph!=='pitch'||G.wind<=0){const k=1-Math.min(1,dt*3.5),A=pitcher.aR.rotation;if(A.x>3){A.x+=(6.283-A.x)*Math.min(1,dt*4);if(A.x>6.2)A.x=0}else A.x*=k;pitcher.aL.rotation.x*=k;pitcher.torso.rotation.x*=k;pitcher.torso.rotation.y*=k;pitcher.lL.rotation.x*=k;pitcher.g.position.z+=(-18.4-pitcher.g.position.z)*Math.min(1,dt*3)}
+ if(G.sw>=0)G.sw+=dt/.3;if(G.bh&&G.sw>.5)batter.g.visible=false;if(G.sw<0)bat.rotation.z=.3+Math.sin(clock.elapsedTime*5)*.1;if(ph!=='play')F.forEach((h,i)=>{h.torso.rotation.x=.18+Math.sin(clock.elapsedTime*2+i)*.04});catcher.aL.rotation.x+=((ph==='pitch'&&G.wind<=0?-1.4:0)-catcher.aL.rotation.x)*Math.min(1,dt*10);const u=clamp(G.sw,0,1);batter.torso.rotation.y=G.sw<0?(G.hold?1.35:.9):.9-2.3*ease(u);bat.rotation.x=G.sw<0?0:Math.min(u*4,1)*1.5;batter.g.rotation.y=Math.PI/2+(G.sw<0?(G.hold?.25:0):-.55*ease(u));batter.lL.rotation.x=G.sw<0?(G.hold?-.4:0):-.4*(1-u);batter.lR.rotation.x=G.sw<0?0:.35*Math.sin(u*Math.PI);
  F.forEach((h,i)=>{if(ph==='play')return;const sp=G.top?8+lvl()*.2:6+posCard(POS[i]).s/100*5,t=h===fx&&G.chase&&fl?fl.land:h.home,d=tmp.copy(t).sub(h.g.position);d.y=0;const l=d.length();
   if(l>.2){h.g.position.addScaledVector(d,Math.min(1,sp*dt/l));h.g.rotation.y=Math.atan2(d.x,d.z);h.lL.rotation.x=Math.sin(clock.elapsedTime*14)*.7;h.lR.rotation.x=-h.lL.rotation.x}else h.lL.rotation.x=h.lR.rotation.x=0});
- RN.forEach(h=>{if(!h.g.visible)return;const q=h.q;if(h.wait>0){h.wait-=dt}else if(q.length){const d=tmp.copy(q[0]).sub(h.g.position);d.y=0;const l=d.length();if(l<.5){q.shift();if(!q.length&&h.hide)h.g.visible=false}else{h.g.position.addScaledVector(d,Math.min(1,(h.spd||24)*dt/l));h.g.rotation.y=Math.atan2(d.x,d.z);h.lL.rotation.x=Math.sin(clock.elapsedTime*18)*.9;h.lR.rotation.x=-h.lL.rotation.x}}else h.lL.rotation.x=h.lR.rotation.x=0});bs.visible=ball.visible;bs.position.set(ball.position.x,.06,ball.position.z);ring.visible=ph==='ready'||ph==='pitch'||ph==='gauge';const sp0=!G.top&&(ph==='ready'||ph==='gauge'),sp1=G.top&&S.diff===0&&ph==='pitch'&&G.wind<=0&&!G.swung;pl.visible=sp0||sp1;
+ RN.forEach(h=>{if(!h.g.visible)return;const q=h.q;if(h.wait>0){h.wait-=dt}else if(q.length){const d=tmp.copy(q[0]).sub(h.g.position);d.y=0;const l=d.length();if(l<.5){q.shift();if(!q.length&&h.hide)h.g.visible=false}else{h.g.position.addScaledVector(d,Math.min(1,(h.spd||24)*dt/l));h.g.rotation.y=Math.atan2(d.x,d.z);h.lL.rotation.x=Math.sin(clock.elapsedTime*18)*.9;h.lR.rotation.x=-h.lL.rotation.x;h.aR.rotation.x=-h.lL.rotation.x*.9;h.aL.rotation.x=-h.lR.rotation.x*.9;h.torso.rotation.x=.3}}else{h.lL.rotation.x=h.lR.rotation.x=0;h.aR.rotation.x=h.aL.rotation.x=0;h.torso.rotation.x=.05}});bs.visible=ball.visible;bs.position.set(ball.position.x,.06,ball.position.z);ring.visible=ph==='ready'||ph==='pitch'||ph==='gauge';const sp0=!G.top&&(ph==='ready'||ph==='gauge'),sp1=G.top&&S.diff===0&&ph==='pitch'&&G.wind<=0&&!G.swung;pl.visible=sp0||sp1;
 if(pl.visible){const ty=PT[G.sel],a=sp0?{x:cx,y:cy,z:0}:G.aim,br=sp0?ty.b:G.br,t0=sp0?0:Math.min(G.pt/G.T,1);for(let i=0;i<24;i++){pp(a,br,t0+(1-t0)*i/23,tmp);plPos[i*3]=tmp.x;plPos[i*3+1]=tmp.y;plPos[i*3+2]=tmp.z}pl.geometry.attributes.position.needsUpdate=true}
 if(fwT>0){fwT-=dt;for(let i=0;i<fwN;i++){fwV[i][1]-=6*dt;fwP[i*3]+=fwV[i][0]*dt;fwP[i*3+1]+=fwV[i][1]*dt;fwP[i*3+2]+=fwV[i][2]*dt}fw.geometry.attributes.position.needsUpdate=true;if(fwT<=0)fw.visible=false}
 const sp2=ph==='pitch'&&G.wind<=0;tl2.visible=sp2;if(sp2){const t1=Math.min(G.pt/G.T,1),t0=Math.max(0,t1-.4);for(let i=0;i<10;i++){pp(G.aim,G.br,t0+(t1-t0)*i/9,tmp);trPos[i*3]=tmp.x;trPos[i*3+1]=tmp.y;trPos[i*3+2]=tmp.z}tl2.geometry.attributes.position.needsUpdate=true}
@@ -251,7 +251,7 @@ const act0=ph==='ready'||ph==='pitch'||ph==='gauge';ring.visible=act0&&G.top;aim
  if(ph==='play'&&!G.ov){tp=tmp.set(fl.p.x*.4,9,14);tl=fl.p}else if((ph==='play'&&G.ov)||(ph==='result'&&(G.chase||mvg()))){tp=tmp.set(0,34,22);tl=new THREE.Vector3(0,0,-26)}
  else if(G.top||ph==='menu'){tp=tmp.set(0,1.75,5.4);tl=new THREE.Vector3(0,1,-8)}
  else{tp=tmp.set(0,2.3,-21);tl=new THREE.Vector3(0,.95,0)}
- const k=1-Math.exp(-4*dt);camP.lerp(tp,k);camL.lerp(tl,k);cam.position.copy(camP);cam.lookAt(camL);const fv=(ph==='result'||(ph==='play'&&G.ov))&&(G.chase||mvg())?42:G.chase?55:G.top||ph==='menu'?40:24;if(Math.abs(cam.fov-fv)>.1){cam.fov+=(fv-cam.fov)*k;cam.updateProjectionMatrix()}R.render(scene,cam)}
+ const k=1-Math.exp(-4*dt);camP.lerp(tp,k);camL.lerp(tl,k);cam.position.copy(camP);if(shk>0){shk-=dt;cam.position.x+=(Math.random()-.5)*shk*.8;cam.position.y+=(Math.random()-.5)*shk*.8}cam.lookAt(camL);const fv=(ph==='result'||(ph==='play'&&G.ov))&&(G.chase||mvg())?42:G.chase?55:G.top||ph==='menu'?40:24;if(Math.abs(cam.fov-fv)>.1){cam.fov+=(fv-cam.fov)*k;cam.updateProjectionMatrix()}R.render(scene,cam)}
 // ===== 実戦守備シミュレーション（打球→捕球→送球→アウト/セーフ） =====
 const FN=['ファースト','セカンド','ショート','サード','レフト','センター','ライト'],BX=BPT.map(v=>[v.x,v.z]),dd=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]),BN=['','一塁','二塁','三塁','本塁'];
 const vfOf=i=>G.top?7+lvl()*.1:6.2+posCard(POS[i]).s/100*3,armOf=i=>G.top?23+lvl()*.25:21+posCard(POS[i]).o/100*7,rgOf=i=>1.5+(G.top?lvl()*.03:(posCard(POS[i]).o-50)/150),hp=i=>[F[i].home.x,F[i].home.z];
@@ -285,7 +285,7 @@ function plan(th,ph,v,q,g,D,bh){
  if(!g&&!wallHit&&Math.hypot(L[0],L[1])>=FENCE){R.hr=true;R.text='ホームラン！！';P.segs=[[0,tL,fly]];runs.forEach(r=>{r.tb=4;r.sv=20;r.d=r.b?0:.2});return finish(tL)}
  let best=1e9,bi=0;for(let i=0;i<7;i++){const t=.2+Math.max(0,dd(hp(i),L)-rgOf(i))/vfOf(i);if(t<best){best=t;bi=i}}
  if(!g&&!wallHit&&best<=tL){
-  FA(bi,hp(bi),L,0,Math.max(best,.3));P.tField=tL;
+  FA(bi,hp(bi),L,0,Math.max(best,.3));P.tField=tL;P.thr={i:bi,t:tL+.6};P.pk=tL;
   runs[0].skip=true;runs[0].out=true;runs[0].tb=0;runs[0].ot=tL;runs[0].h.g.visible=false;runs[0].h.q=[];
   let tg=null;
   if(G.out<2){const depth=Math.hypot(L[0],L[1]),arm=armOf(bi);
@@ -300,7 +300,7 @@ function plan(th,ph,v,q,g,D,bh){
  for(let i=0;i<7;i++){const h=hp(i),rg=rgOf(i),vf=vfOf(i);let ti=null;for(let t=t0;t<=tSt;t+=.04)if(.2+Math.max(0,dd(h,gp(t))-rg)/vf<=t){ti=t;break}
   if(ti===null)ti=Math.max(tSt,.2+Math.max(0,dd(h,gp(tSt))-rg)/vf);if(ti<tp){tp=ti;fi=i}}
  const err=Math.random()<.04,Tpick=tp+.25+(err?.9:0)+(wallHit?1:0),Pp=gp(Math.min(tp,tSt)),arm=armOf(fi),Tth=Tpick+.4,Tdec=Tpick-.3,depth=Math.hypot(Pp[0],Pp[1]),deep=!g||depth>48;
- FA(fi,hp(fi),Pp,0,Math.max(.3,tp));P.tField=tp;
+ FA(fi,hp(fi),Pp,0,Math.max(.3,tp));P.tField=tp;P.thr={i:fi,t:Tth};P.pk=tp;
  let cap=4;
  [...runs].sort((x,y)=>y.b-x.b).forEach(r=>{
   const rc=r.b+Math.max(0,r.v*(Tdec-r.d))/27.4,ce=Math.ceil(rc-1e-6),
@@ -323,12 +323,12 @@ function plan(th,ph,v,q,g,D,bh){
  if(wallHit){P.tw=tF;if(!bt.out&&!err)R.text='フェンス直撃！'+R.text}return P}
 function playStep(dt){const P=G.P;G.tp+=dt;const t=G.tp,b=P.bp(t);fl.p.set(b[0],b[1],b[2]);ball.position.copy(fl.p);
  P.fa.forEach(o=>{const h=F[o.i],u=clamp((t-o.t0)/o.d,0,1);h.g.position.set(o.f[0]+(o.t[0]-o.f[0])*u,0,o.f[1]+(o.t[1]-o.f[1])*u);
-  if(u>0&&u<1){h.g.rotation.y=Math.atan2(o.t[0]-o.f[0],o.t[1]-o.f[1]);h.lL.rotation.x=Math.sin(t*14)*.7;h.lR.rotation.x=-h.lL.rotation.x}else h.lL.rotation.x=h.lR.rotation.x=0});
+  if(u>0&&u<1){h.g.rotation.y=Math.atan2(o.t[0]-o.f[0],o.t[1]-o.f[1]);h.lL.rotation.x=Math.sin(t*14)*.7;h.lR.rotation.x=-h.lL.rotation.x;h.aR.rotation.x=-h.lL.rotation.x*.8;h.aL.rotation.x=-h.lR.rotation.x*.8;h.torso.rotation.x=.35}else{h.lL.rotation.x=h.lR.rotation.x=0;h.torso.rotation.x=.18}});if(P.thr){const h=F[P.thr.i],tt=t-P.thr.t;if(t>=P.pk&&tt<-.25)h.aL.rotation.x=-1.6;if(tt>=-.25&&tt<.35){h.aR.rotation.x=tt<0?(tt+.25)*11.2:2.8+tt/.35*3.4;h.aL.rotation.x=-1.0}else if(tt>=.35)h.aR.rotation.x=0}
  if(P.tw&&t>=P.tw){P.tw=0;snd(90,.2,'sawtooth',.35,40)}if(t>P.tField)G.ov=true;if(t>=P.T)commit(P)}
-function commit(P){const r=P.res;G.P=null;G.ov=false;batter.g.visible=true;
+function commit(P){const r=P.res;G.P=null;G.ov=false;batter.g.visible=true;F.forEach(h=>{h.aR.rotation.x=0;h.aL.rotation.x=0});
  if(r.foul){if(G.bh){G.bh.g.visible=false;G.bh.q=[]}G.bh=null;if(G.s<2)G.s++;snd(300,.1,'square',.15,150);return show('ファウル',1.1)}
  G.bh=null;if(r.dist>0)tell('飛距離 '+r.dist+'m');G.out+=r.outs;if(r.runs)run(r.runs);G.bases=r.newB;RB=r.newR;fx=null;
- if(r.hr){boom();if(G.top){G.hr=(G.hr||0)+1;S.m.hr++}}cheer=r.hr?3:/ヒット|ベース/.test(r.text)?1.5:cheer;
+ if(r.hr){shk=.8;boom();if(G.top){G.hr=(G.hr||0)+1;S.m.hr++}}cheer=r.hr?3:/ヒット|ベース/.test(r.text)?1.5:cheer;
  if(/ヒット|ベース|ホームラン/.test(r.text))noise(r.hr?3:1.6,r.hr?.35:.2,900);
  endPA(r.text)}
 function startHit(th,ph,v,q){
@@ -336,7 +336,7 @@ function startHit(th,ph,v,q){
  F.forEach(h=>{h.g.position.copy(h.home);h.lL.rotation.x=h.lR.rotation.x=0});
  G.bh=spawn()||RN[0];G.tp=0;G.ov=false;G.chase=true;
  G.P=plan(th,ph,v,q,g,D,G.bh);G.phase='play';ball.visible=true;
- snd(900,.06,'square',.25,200);snd(120,.14,'sawtooth',.3,40);G.slow=.3;G.steal=false;tell('打球速度 '+Math.round(v*3.6)+'km/h　角度 '+Math.round(ph/D2R)+'°');
+ snd(900,.06,'square',.25,200);snd(120,.14,'sawtooth',.3,40);G.slow=.3;G.steal=false;shk=.25;tell('打球速度 '+Math.round(v*3.6)+'km/h　角度 '+Math.round(ph/D2R)+'°');
  const f=$('fl');f.style.transition='none';f.style.opacity=.55;requestAnimationFrame(()=>{f.style.transition='opacity .35s';f.style.opacity=0})}
 
 menu('home');frame();
