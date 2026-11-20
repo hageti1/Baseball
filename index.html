@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -104,7 +105,7 @@ const BPT=[[0,0],[19.4,-19.4],[0,-38.8],[-19.4,-19.4]].map(([x,z])=>new THREE.Ve
 const mvg=()=>RN.some(h=>h.q.length),spawn=()=>{const h=RN.find(h=>!h.g.visible);if(h){h.g.visible=true;h.g.position.set(-.6,0,.2);h.q=[];h.hide=false}return h||null},mv=(h,f,t,hide)=>{if(!h)return;h.q=[];h.spd=0;h.wait=0;h.slide=false;for(let i=f+1;i<=t;i++)h.q.push(BPT[i%4]);h.hide=!!hide};
 
 // ---- game ----
-const newG=()=>(N=[3,6,9][S.len||0],{ls:[[],[]],wd:Math.round(rnd(-6,6)),night:Math.random()<.5,inn:1,top:true,out:0,b:0,s:0,bases:[0,0,0],score:[0,0],phase:'menu',timer:1.5,pt:0,T:1,sel:0,swung:false,chase:false,ord:0,sw:-1,wind:0,gt:0,pwT:false});
+const newG=()=>(N=[3,6,9][S.len||0],{ls:[[],[]],H:[0,0],E:[0,0],wd:Math.round(rnd(-6,6)),night:Math.random()<.5,inn:1,top:true,out:0,b:0,s:0,bases:[0,0,0],score:[0,0],phase:'menu',timer:1.5,pt:0,T:1,sel:0,swung:false,chase:false,ord:0,sw:-1,wind:0,gt:0,pwT:false});
 let G=newG(),cx=0,cy=.8,tx=0,ty=.8,sgn=1,flash=0,fl=null,fx=null,camP=new THREE.Vector3(0,1.9,5),camL=new THREE.Vector3(0,1.1,-10),meetR=.32;
 const keys={},OPP=()=>OL.on?[OL.opp.name,OL.opp.col]:TEAMS[S.opp],lvl=()=>S.opp+1,curB=()=>OL.on&&!G.top?((OL.oppSub&&OL.oppSub[(G.ordO||0)%9])||OL.opp.deck[(G.ordO||0)%9]):(G.sub&&G.sub[G.ord%9])||lineup()[G.ord%9],isPW=()=>keys.Shift||G.pwT;
 $('pb').innerHTML=PT.map((p,i)=>`<button data-i="${i}">${i+1} ${p.n}</button>`).join('');
@@ -119,7 +120,7 @@ function setMode(){applySky(G.night);G.phase='ready';G.timer=1.4;G.chase=false;s
  dress(G.top?OPP()[1]:MYC);RB=[null,null,null];RN.forEach(h=>{h.g.visible=false;h.q=[];h.mj.color.set(G.top?MYC:OPP()[1]);h.mc.color.set(G.top?MYC:OPP()[1])});if(G.top){const c=curB();meetR=.13+c.m/100*.07}else meetR=.3;ui()}
 function ui(){
  const B=G.bases,c=G.top&&curB();
- $('sb').innerHTML=`<b>${G.inn}回${(G.top!==!!G.home)?'表':'裏'}</b>　${MY} <b>${G.score[0]}</b> - <b>${G.score[1]}</b> ${OPP()[0]}<br><small>${[0,1].map(k=>(k?OPP()[0]:MY).slice(0,4)+' '+Array.from({length:Math.max(N,G.inn)},(_,i)=>(k==0?i<G.inn:(i<G.inn-1||(!G.top&&i==G.inn-1)))?(G.ls[k][i]||0):'-').join(' ')).join('<br>')}</small><br><small>${G.night?'ナイター':'デーゲーム'}　風 ${G.wd>0?'外野へ':G.wd<0?'本塁へ':'なし'}${Math.abs(G.wd)}m/s</small><br>B${'●'.repeat(G.b)}${'○'.repeat(3-G.b)} S${'●'.repeat(G.s)}${'○'.repeat(2-G.s)} O${'●'.repeat(G.out)}${'○'.repeat(2-G.out)}　一塁${B[0]?'●':'○'} 二塁${B[1]?'●':'○'} 三塁${B[2]?'●':'○'}`+(c?`<br>打者 ${c.n}（${c.r}）ミート${c.m} パワー${c.p}${c.k?' ★'+SK[c.k]:''}`:'')+(G.kmh?`<br>${G.phase==='result'?G.pn+' ':''}${G.kmh}km/h`:'');
+ $('sb').innerHTML=`<b>${G.inn}回${(G.top!==!!G.home)?'表':'裏'}</b>　${MY} <b>${G.score[0]}</b> - <b>${G.score[1]}</b> ${OPP()[0]}<br><small>${[0,1].map(k=>(k?OPP()[0]:MY).slice(0,4)+' '+Array.from({length:Math.max(N,G.inn)},(_,i)=>(k==0?i<G.inn:(i<G.inn-1||(!G.top&&i==G.inn-1)))?(G.ls[k][i]||0):'-').join(' ')+' | R'+G.score[k]+' H'+(G.H?G.H[k]:0)+' E'+(G.E?G.E[k]:0)).join('<br>')}</small><br><small>${G.night?'ナイター':'デーゲーム'}　風 ${G.wd>0?'外野へ':G.wd<0?'本塁へ':'なし'}${Math.abs(G.wd)}m/s</small><br>B${'●'.repeat(G.b)}${'○'.repeat(3-G.b)} S${'●'.repeat(G.s)}${'○'.repeat(2-G.s)} O${'●'.repeat(G.out)}${'○'.repeat(2-G.out)}　一塁${B[0]?'●':'○'} 二塁${B[1]?'●':'○'} 三塁${B[2]?'●':'○'}`+(c?`<br>打者 ${c.n}（${c.r}）ミート${c.m} パワー${c.p}${c.k?' ★'+SK[c.k]:''}`:'')+(G.kmh?`<br>${G.phase==='result'?G.pn+' ':''}${G.kmh}km/h`:'');
  $('pb').style.display=G.top||G.phase==='menu'?'none':'flex';$('pw').style.display=G.top&&G.phase!=='menu'?'block':'none';
  $('st').style.display=G.top&&G.phase!=='menu'&&G.bases[0]&&!G.bases[1]?'block':'none';$('st').classList.toggle('on',!!G.steal);$('st').textContent='盗塁'+(G.steal?' ON':'');$('rn').style.display=G.top&&G.phase!=='menu'?'block':'none';$('rn').classList.toggle('on',!!G.push);$('rn').textContent='積極走塁'+(G.push?' ON':'');const bn=S.cards.filter(c=>!S.deck.includes(c.id)&&c.id!==S.sp).length;$('pn').style.display=G.top&&(G.phase==='ready'||G.phase==='result')&&(G.pc||0)<2&&bn>0?'block':'none';$('rp').style.display=!G.top&&G.phase==='ready'&&(G.rc||0)<2&&bn>0?'block':'none';$('rp').textContent='継投（球数'+(G.np||0)+'）';$('bu').style.display=G.top&&(G.phase==='ready'||G.phase==='pitch')?'block':'none';$('bu').classList.toggle('on',!!G.bunt);{const occ=[1,2,3].filter(b=>G.bases[b-1]&&RB[b-1]);$('ld').style.display=G.top&&!OL.on&&occ.length&&(G.phase==='ready'||G.phase==='pitch')?'block':'none';$('ld').textContent='リード'+[2,3.5,5][G.ldI||0]+'m';$('po').style.display=!G.top&&occ.length&&G.phase==='ready'?'block':'none';$('gg').style.display=G.top&&occ.length&&(G.phase==='ready'||G.phase==='pitch')?'block':'none';$('gg').classList.toggle('on',!!G.go)}$('pw').textContent='パワー '+(isPW()?'ON':'OFF');$('pw').classList.toggle('on',isPW());
  [...$('pb').children].forEach((b,i)=>b.classList.toggle('on',i===G.sel));
@@ -155,7 +156,7 @@ function startPitch(err){
  if(G.top){const ah=G.s>G.b,bh=G.b>G.s||G.b===3;ty=PT[bh&&Math.random()<.75?Math.random()*3|0:ah&&Math.random()<.65?3+(Math.random()*5|0):Math.random()*PT.length|0];const pin=(G.b===3?.92:bh?.72:ah?.3:.5+L*.02)-Math.max(0,(G.cnp||0)-30)*.005;aim=Math.random()<pin?{x:rnd(-.26,.26),y:rnd(.5,1.1)}:{x:(Math.random()<.5?-1:1)*rnd(.34,.55),y:rnd(.2,1.4)}}
  else{ty=PT[G.sel];G.np=(G.np||0)+1;const j=.07-((G.sp||cid(S.sp)).o-50)/50*.035+err*.45+Math.max(0,G.np-25)*.004;aim={x:cx+rnd(-j,j),y:cy+rnd(-j,j)}}
  G.aim=new THREE.Vector3(aim.x,aim.y,0);G.T=ty.T*(G.top?(1-L*.012)*[1.6,1.25,1][S.diff||0]*(1+Math.max(0,(G.cnp=(G.cnp||0)+1)-30)*.004):1+Math.max(0,(G.np||0)-30)*.004);G.br=[ty.b[0]*(G.top&&Math.random()<.5?-1:1),ty.b[1],ty.b[2]];
- batter.g.visible=true;G.bh=null;if(G.top)meetR=mR();{const c=G.top?curB():null;applyShift(G.top?(c.p>72?2:c.p<45?0:1):(S.dep??1),G.top?1:(S.idep??1))}if(G.b===0&&G.s===0)intro();if(OL.on&&!G.top)snd2({t:'pitch',sel:G.sel,ax:aim.x,ay:aim.y,T:G.T,od:S.dep??1,id:S.idep??1});G.kmh=Math.round(17.5/G.T*3.6/1.03);G.pn=ty.n;G.pt=0;G.swung=false;G.sw=-1;G.phase='pitch';G.wind=G.top?WD():0;ball.visible=!G.top;$('msg').textContent='';ui()}
+ batter.g.visible=true;G.bh=null;if(G.top)meetR=mR();{const c=G.top?curB():null;applyShift(G.top?(c.p>72?2:c.p<45?0:1):(S.dep??1),G.top?1:(S.idep??1))}if(G.b===0&&G.s===0)intro();if(!G.top&&!OL.on)G.steal=!!(G.bases[0]&&!G.bases[1]&&Math.random()<.08);if(OL.on&&!G.top)snd2({t:'pitch',sel:G.sel,ax:aim.x,ay:aim.y,T:G.T,od:S.dep??1,id:S.idep??1});G.kmh=Math.round(17.5/G.T*3.6/1.03);G.pn=ty.n;G.pt=0;G.swung=false;G.sw=-1;G.phase='pitch';G.wind=G.top?WD():0;ball.visible=!G.top;$('msg').textContent='';ui()}
 function startHit(th,ph,v,q){
  const g=ph<8*D2R,vel=g?new THREE.Vector3(Math.sin(th)*24,0,-Math.cos(th)*24):new THREE.Vector3(v*Math.cos(ph)*Math.sin(th),v*Math.sin(ph),-v*Math.cos(ph)*Math.cos(th)),D=18+q*45;
  let land;if(g)land=new THREE.Vector3(Math.sin(th)*D,0,-Math.cos(th)*D);else{const t=(vel.y+Math.sqrt(vel.y*vel.y+17.6))/9.8;land=new THREE.Vector3(vel.x*t,0,vel.z*t)}
@@ -177,7 +178,7 @@ function cpuBat(){
  const inz=Math.abs(G.aim.x)<ZX&&G.aim.y>Y0&&G.aim.y<Y1;
  const swp=inz?(G.b===3?.1:G.s===2?.92:.72):(G.s===2?.45:.2);if(Math.random()>swp)return judge();
  G.sw=0;const dc=Math.hypot(G.aim.x,G.aim.y-.8)/.4,p=Math.max(.1,.55+lvl()*.02-dc*.3-(G.T>.55?.1:0));
- if(Math.random()>p)return strike('空振り');
+ if(Math.random()>p){doSteal();return strike('空振り')}
  const q=Math.pow(Math.random(),1.2);startHit(rnd(-55,55)*D2R,rnd(-4,42)*D2R,20+q*24,q)}
 function act(){
  if(G.phase==='over'){OL.closing=1;olReset();OL.on=false;OL.started=0;OL.closing=0;return menu('home')}
@@ -303,7 +304,7 @@ function plan(th,ph,v,q,g,D,bh){
   if(G.out+outs>=3)sc=fo?[]:sc.filter(r=>r.d+(27.4*(4-r.b)-r.ld)/(r.sv||r.v)<oT);
   R.outs=outs;R.runs=sc.length;let tE=tBall;
   runs.forEach(r=>{if(r.skip)return;const sp=r.sv||r.v;if(r.out&&r.tb<=r.b){r.h.g.visible=false;r.h.q=[]}
-   if(r.tb>r.b){mv(r.h,r.b,r.tb,!!r.out||r.tb>=4);r.h.spd=sp;r.h.wait=r.d;r.h.slide=r.tb<4&&(!!r.out||Math.random()<.4);tE=Math.max(tE,r.d+(27.4*(r.tb-r.b)-r.ld)/sp)}
+   if(r.tb>r.b){mv(r.h,r.b,r.tb,!!r.out||r.tb>=4);r.h.spd=sp;r.h.wait=r.d;r.h.slide=(r.tb<4&&(!!r.out||Math.random()<.4))||(r.tb>=4&&!!r.out);tE=Math.max(tE,r.d+(27.4*(r.tb-r.b)-r.ld)/sp)}
    if(!r.out&&r.tb<4){R.newB[r.tb-1]=1;R.newR[r.tb-1]=r.h;r.h.vs=r.v}});
   P.T=tE+.7;return P}
  R.dist=g?0:Math.round(Math.hypot(L[0],L[1]));if(!fair){R.foul=true;P.segs=g?[[0,tSt,gnd]]:[[0,tL,fly],[tL,tSt,gnd]];P.T=Math.max(tL+.8,1.4);return P}
@@ -358,7 +359,7 @@ function commit(P){const r=P.res;G.P=null;G.ov=false;batter.g.visible=true;F.for
  G.bh=null;if(r.dist>0)tell('飛距離 '+r.dist+'m');G.out+=r.outs;if(r.runs)run(r.runs);G.bases=r.newB;RB=r.newR;fx=null;
  if(r.hr){shk=.8;boom();if(G.top){G.hr=(G.hr||0)+1;S.m.hr++}}cheer=r.hr?3:/ヒット|ベース/.test(r.text)?1.5:cheer;
  if(/ヒット|ベース|ホームラン/.test(r.text))noise(r.hr?3:1.6,r.hr?.35:.2,900);
- if(r.hide)r.hide.forEach(h=>{h.g.visible=false;h.q=[]});r.keep?show(r.text,1.3):endPA(r.text)}
+ if(!r.keep&&G.H){const bk=G.top?0:1;if(/ヒット|ベース|ホームラン/.test(r.text)&&!/タッチアウト/.test(r.text))G.H[bk]++;if(/エラー/.test(r.text))G.E[1-bk]++}if(r.hide)r.hide.forEach(h=>{h.g.visible=false;h.q=[]});r.keep?show(r.text,1.3):endPA(r.text)}
 function startHit0(th,ph,v,q){
  const g=ph<8*D2R,D=v<14?5+q*6:18+q*45;fl={q,th,ph,g,D,p:new THREE.Vector3(0,1,0),v:new THREE.Vector3(),land:new THREE.Vector3()};
  F.forEach(h=>{h.g.rotation.order='YXZ';h.g.position.copy(h.home);h.lL.rotation.x=h.lR.rotation.x=0});
